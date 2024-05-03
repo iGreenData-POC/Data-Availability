@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"github.com/0xPolygon/cdk-data-availability/log"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
@@ -77,23 +78,26 @@ func sendRequestsToAdaptor(ctx context.Context, url string, payload MessagePaylo
 	if err != nil {
 		return nil, err
 	}
-
 	return responseBody, nil
 }
 
 // Sign returns a signed sequence by the private key.
 // Note that what's being signed is the accumulated input hash
 func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey) (*SignedSequence, error) {
+	log.Infof("Inside sequence.go Sign function!")
 	hashToSign := s.HashToSign()
 
 	payload := MessagePayload{
 		Data: hex.EncodeToString(hashToSign),
 	}
+	log.Infof("Created message payload!")
 	//add
 	sig, err := sendRequestsToAdaptor(context.Background(), "http://34.136.253.25:3000/v1/sign-message", payload)
 	if err != nil {
+		log.Infof("Failed to send message request to adaptor")
 		return nil, err
 	}
+	log.Infof("Send message request to adaptor!", sig)
 	/*sig, err := crypto.Sign(hashToSign, privateKey)
 	if err != nil {
 		return nil, err
