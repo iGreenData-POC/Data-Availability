@@ -1,14 +1,20 @@
 package types
 
 import (
+	"bytes"
+	"context"
 	"crypto/ecdsa"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
-	"math/big"
-	"strings"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
+	"io/ioutil"
+	"math/big"
+	"net/http"
+	"strings"
+	"time"
 )
 
 const (
@@ -18,6 +24,10 @@ const (
 // Sequence represents the data that the sequencer will send to L1
 // and other metadata needed to build the accumulated input hash aka accInputHash
 type Sequence []ArgBytes
+
+type MessagePayload struct {
+	Data string `json:"data"`
+}
 
 // HashToSign returns the accumulated input hash of the sequence.
 // Note that this is equivalent to what happens on the smart contract
@@ -37,14 +47,57 @@ func (s *Sequence) HashToSign() []byte {
 	return currentHash
 }
 
+func sendRequestsToAdaptor(ctx context.Context, url string, payload MessagePayload) ([]byte, error) {
+	client := &http.Client{
+		Timeout: time.Second * 10, // Set a timeout for the request
+	}
+
+	// Marshal the payload into JSON
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create the POST request
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json") // Set header to application/json
+
+	// Send the request
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return responseBody, nil
+}
+
 // Sign returns a signed sequence by the private key.
 // Note that what's being signed is the accumulated input hash
 func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey) (*SignedSequence, error) {
 	hashToSign := s.HashToSign()
-	sig, err := crypto.Sign(hashToSign, privateKey)
+
+	payload := MessagePayload{
+		Data: hex.EncodeToString(hashToSign),
+	}
+	//add
+	sig, err := sendRequestsToAdaptor(context.Background(), "http://34.136.253.25:3000/v1/sign-message", payload)
 	if err != nil {
 		return nil, err
 	}
+	/*sig, err := crypto.Sign(hashToSign, privateKey)
+	if err != nil {
+		return nil, err
+	}*/
 
 	rBytes := sig[:32]
 	sBytes := sig[32:64]
