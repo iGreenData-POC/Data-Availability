@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/ecdsa"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -151,16 +152,43 @@ type SignedSequence struct {
 }
 
 // Signer returns the address of the signer
+// must be changed to use ecrecover as per the fireblocks signing
 func (s *SignedSequence) Signer() (common.Address, error) {
 	if len(s.Signature) != signatureLen {
+		log.Infof("Invalid signature for sequence from sequencer!")
 		return common.Address{}, errors.New("invalid signature")
 	}
 	sig := make([]byte, signatureLen)
 	copy(sig, s.Signature)
 	sig[64] -= 27
-	pubKey, err := crypto.SigToPub(s.Sequence.HashToSign(), sig)
+
+	//double hash as per Fireblocks
+
+	log.Infof("Creating firstHash")
+	firstHash := s.Sequence.HashToSign()
+
+	log.Infof("Hex encoding firstHash")
+	message := hex.EncodeToString(firstHash)
+
+	log.Infof("Creating wrapped message")
+	wrappedMessage := "\x19Ethereum Signed Message:\n" +
+		string(rune(len(message))) +
+		message
+
+	log.Infof("Creating SHA256 hash of wrapped message")
+	// Calculate the hash of the wrapped message
+	hash := sha256.Sum256([]byte(wrappedMessage))
+
+	log.Infof("Creating hash of hash of SHA256")
+	// Calculate the hash of the hash
+	contentHash := sha256.Sum256(hash[:])
+
+	log.Infof("Recovering public key")
+	pubKey, err := crypto.SigToPub(contentHash[:], sig)
 	if err != nil {
+		log.Infof("error converting to public key", err)
 		return common.Address{}, err
 	}
+
 	return crypto.PubkeyToAddress(*pubKey), nil
 }

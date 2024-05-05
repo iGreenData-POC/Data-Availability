@@ -38,6 +38,7 @@ func NewDataComEndpoints(
 // This endpoint is only accessible to the sequencer
 func (d *DataComEndpoints) SignSequence(signedSequence types.SignedSequence) (interface{}, rpc.Error) {
 	// Verify that the request comes from the sequencer
+	//To verify that the request comes from the sequencer!!!
 	sender, err := signedSequence.Signer()
 	if err != nil {
 		return "0x0", rpc.NewRPCError(rpc.DefaultErrorCode, "failed to verify sender")
