@@ -8,15 +8,16 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"github.com/0xPolygon/cdk-data-availability/log"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	solsha3 "github.com/miguelmota/go-solidity-sha3"
 	"io/ioutil"
 	"math/big"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/0xPolygon/cdk-data-availability/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	solsha3 "github.com/miguelmota/go-solidity-sha3"
 )
 
 const (
@@ -159,7 +160,12 @@ func (s *SignedSequence) Signer() (common.Address, error) {
 		return common.Address{}, errors.New("invalid signature")
 	}
 	log.Infof("The received signature from sequence sender", s.Signature.Hex())
-	sig := make([]byte, signatureLen)
+
+	// mySig := make([]byte, 65)
+	// copy(mySig, sig)
+	// mySig[64] -= 27
+
+	sig := make([]byte, 65)
 	copy(sig, s.Signature)
 	sig[64] -= 27
 
@@ -174,8 +180,8 @@ func (s *SignedSequence) Signer() (common.Address, error) {
 
 	log.Infof("Creating wrapped message")
 	wrappedMessage := "\x19Ethereum Signed Message:\n" +
-		string(rune(len(message))) +
-		message
+		string(rune(len("9e58d84aee5fa6759a4aaad20ec1baf2965639b641af149903d6378f18fd1c78"))) +
+		"9e58d84aee5fa6759a4aaad20ec1baf2965639b641af149903d6378f18fd1c78"
 
 	log.Infof("Creating SHA256 hash of wrapped message")
 	// Calculate the hash of the wrapped message
