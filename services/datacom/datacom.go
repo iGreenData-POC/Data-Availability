@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
+
 	"github.com/0xPolygon/cdk-data-availability/log"
 
 	"github.com/0xPolygon/cdk-data-availability/db"
@@ -41,6 +42,7 @@ func (d *DataComEndpoints) SignSequence(signedSequence types.SignedSequence) (in
 	// Verify that the request comes from the sequencer
 	//To verify that the request comes from the sequencer!!!
 	log.Infof("=======================Calling SignSequence at DAC===============================")
+
 	sender, err := signedSequence.Signer()
 	if err != nil {
 		return "0x0", rpc.NewRPCError(rpc.DefaultErrorCode, "failed to verify sender")

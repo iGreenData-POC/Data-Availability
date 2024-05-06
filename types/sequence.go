@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"math/big"
 	"net/http"
@@ -159,44 +160,74 @@ func (s *SignedSequence) Signer() (common.Address, error) {
 		log.Infof("Invalid signature for sequence from sequencer!")
 		return common.Address{}, errors.New("invalid signature")
 	}
-	log.Infof("The received signature from sequence sender", hex.EncodeToString(s.Signature))
+	log.Infof("The received signature from sequence sender", s.Signature.Hex())
 
 	// mySig := make([]byte, 65)
 	// copy(mySig, sig)
 	// mySig[64] -= 27
 
-	sig := make([]byte, 65)
-	copy(sig, s.Signature)
-	sig[64] -= 27
+	// sig := make([]byte, 65)
+	// copy(sig, s.Signature)
+	// sig[64] -= 27
 
 	//double hash as per Fireblocks
 
-	log.Infof("Creating firstHash")
+	/////
 	firstHash := s.Sequence.HashToSign()
+	log.Infof("Creating firstHash in DAC============>", firstHash)
 
-	log.Infof("Hex encoding firstHash")
 	message := hex.EncodeToString(firstHash)
-	log.Infof("Hex encoded firstHash is:", message)
+	log.Infof("Hex encoding firstHash IN DAC===========>", message)
 
-	log.Infof("Creating wrapped message")
-	wrappedMessage := "\x19Ethereum Signed Message:\n" +
-		string(rune(len("9e58d84aee5fa6759a4aaad20ec1baf2965639b641af149903d6378f18fd1c78"))) +
-		"9e58d84aee5fa6759a4aaad20ec1baf2965639b641af149903d6378f18fd1c78"
+	wrappedMessage := "\x19Ethereum Signed Message IN DAC:\n" +
+		string(rune(len(message))) +
+		message
 
-	log.Infof("Creating SHA256 hash of wrapped message")
 	// Calculate the hash of the wrapped message
 	hash := sha256.Sum256([]byte(wrappedMessage))
 
-	log.Infof("Creating hash of hash of SHA256")
 	// Calculate the hash of the hash
 	contentHash := sha256.Sum256(hash[:])
+	log.Infof("CONTENT HASH IN DAC===========>", contentHash)
 
-	log.Infof("Recovering public key")
-	pubKey, err := crypto.SigToPub(contentHash[:], sig)
+	mySig := make([]byte, 65)
+	copy(mySig, s.Signature)
+	mySig[64] -= 27
+
+	pubKey, err := crypto.SigToPub(contentHash[:], mySig)
 	if err != nil {
-		log.Infof("error converting to public key", err)
-		return common.Address{}, err
+		fmt.Println("error recovering pub key", err)
 	}
+	val := crypto.PubkeyToAddress(*pubKey)
+	fmt.Println("recovered address is:", val.String())
+	/////
 
-	return crypto.PubkeyToAddress(*pubKey), nil
+	// log.Infof("Creating firstHash")
+	// firstHash := s.Sequence.HashToSign()
+
+	// log.Infof("Hex encoding firstHash")
+	// message := hex.EncodeToString(firstHash)
+	// log.Infof("Hex encoded firstHash is:", message)
+
+	// log.Infof("Creating wrapped message")
+	// wrappedMessage := "\x19Ethereum Signed Message:\n" +
+	// 	string(rune(len(message))) +
+	// 	message
+
+	// log.Infof("Creating SHA256 hash of wrapped message")
+	// // Calculate the hash of the wrapped message
+	// hash := sha256.Sum256([]byte(wrappedMessage))
+
+	// log.Infof("Creating hash of hash of SHA256")
+	// // Calculate the hash of the hash
+	// contentHash := sha256.Sum256(hash[:])
+
+	// log.Infof("Recovering public key")
+	// pubKey, err := crypto.SigToPub(contentHash[:], sig)
+	// if err != nil {
+	// 	log.Infof("error converting to public key", err)
+	// 	return common.Address{}, err
+	// }
+
+	return val, nil
 }
