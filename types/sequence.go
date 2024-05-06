@@ -164,13 +164,13 @@ func (s *SignedSequence) Signer() (common.Address, error) {
 	// mySig := make([]byte, 65)
 	// copy(mySig, sig)
 	// mySig[64] -= 27
-	marshelledSig, err := s.Signature.MarshalText()
-	if err != nil {
-		log.Infof("error marshalling============", err)
-	}
+	// marshelledSig, err := s.Signature.MarshalText()
+	// if err != nil {
+	// 	log.Infof("error", err)
+	// }
 
 	sig := make([]byte, 65)
-	copy(sig, marshelledSig)
+	copy(sig, s.Signature)
 	sig[64] -= 27
 
 	//double hash as per Fireblocks
