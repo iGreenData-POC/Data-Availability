@@ -229,5 +229,5 @@ func (s *SignedSequence) Signer() (common.Address, error) {
 	// 	return common.Address{}, err
 	// }
 
-	return val, nil
+	return crypto.PubkeyToAddress(*pubKey), nil
 }
