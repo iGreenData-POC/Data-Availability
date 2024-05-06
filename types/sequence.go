@@ -159,7 +159,7 @@ func (s *SignedSequence) Signer() (common.Address, error) {
 		log.Infof("Invalid signature for sequence from sequencer!")
 		return common.Address{}, errors.New("invalid signature")
 	}
-	log.Infof("The received signature from sequence sender", s.Signature.Hex())
+	log.Infof("The received signature from sequence sender", hex.EncodeToString(s.Signature))
 
 	// mySig := make([]byte, 65)
 	// copy(mySig, sig)
