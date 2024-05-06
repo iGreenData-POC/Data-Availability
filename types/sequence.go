@@ -166,7 +166,7 @@ func (s *SignedSequence) Signer() (common.Address, error) {
 	// mySig[64] -= 27
 
 	sig := make([]byte, 65)
-	copy(sig, hex.EncodeToString(s.Signature))
+	copy(sig, s.Signature)
 	sig[64] -= 27
 
 	//double hash as per Fireblocks
