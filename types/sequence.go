@@ -164,13 +164,13 @@ func (s *SignedSequence) Signer() (common.Address, error) {
 	// mySig := make([]byte, 65)
 	// copy(mySig, sig)
 	// mySig[64] -= 27
-	marshalledSig, err := s.Signature.MarshalText()
+	/*marshalledSig, err := s.Signature.MarshalText()
 	if err != nil {
 		log.Infof("error", err)
-	}
+	}*/
 
 	sig := make([]byte, 65)
-	copy(sig, marshalledSig)
+	copy(sig, s.Signature)
 	sig[64] -= 27
 
 	//double hash as per Fireblocks
@@ -182,7 +182,7 @@ func (s *SignedSequence) Signer() (common.Address, error) {
 	message := hex.EncodeToString(firstHash)
 	log.Infof("Hex encoding firstHash= in DAC==========>", message)
 
-	wrappedMessage := "\x19Ethereum Signed Message in DAC:\n" +
+	wrappedMessage := "\x19Ethereum Signed Message:\n" +
 		string(rune(len(message))) +
 		message
 
