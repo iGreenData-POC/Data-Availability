@@ -158,6 +158,7 @@ func (s *SignedSequence) Signer() (common.Address, error) {
 		log.Infof("Invalid signature for sequence from sequencer!")
 		return common.Address{}, errors.New("invalid signature")
 	}
+	log.Infof("The received signature from sequence sender", s.Signature.Hex())
 	sig := make([]byte, signatureLen)
 	copy(sig, s.Signature)
 	sig[64] -= 27
@@ -169,6 +170,7 @@ func (s *SignedSequence) Signer() (common.Address, error) {
 
 	log.Infof("Hex encoding firstHash")
 	message := hex.EncodeToString(firstHash)
+	log.Infof("Hex encoded firstHash is:", message)
 
 	log.Infof("Creating wrapped message")
 	wrappedMessage := "\x19Ethereum Signed Message:\n" +
