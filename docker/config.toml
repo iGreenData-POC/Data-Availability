@@ -1,4 +1,3 @@
-PrivateKey = {Path = "/pk/test-member.keystore", Password = "password"} # CHANGE THIS (the password): according to the private key file password
 DACAddress="0x3338E5e5CA534c6b9b224Fa9a8621274b4719641"
 [L1]
 WsURL = "wss://eth-sepolia.g.alchemy.com/v2/cU_hSlUcnHTsHQqz48Z6fuzbfM0qc2bq"     # CHANGE THIS: use the URL of your L1 node
