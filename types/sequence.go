@@ -89,7 +89,7 @@ func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey) (*SignedSequence, error) {
 	log.Infof("Inside sequence.go Sign function!")
 	hashToSign := s.HashToSign()
 
-	payload := MessagePayload{
+	/*payload := MessagePayload{
 		Data: hex.EncodeToString(hashToSign),
 	}
 	log.Infof("Created message payload!")
@@ -99,11 +99,12 @@ func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey) (*SignedSequence, error) {
 		log.Infof("Failed to send message request to adaptor")
 		return nil, err
 	}
-	log.Infof("Send message request to adaptor!", sig)
-	/*sig, err := crypto.Sign(hashToSign, privateKey)
+	log.Infof("Send message request to adaptor!", sig)*/
+
+	sig, err := crypto.Sign(hashToSign, privateKey)
 	if err != nil {
 		return nil, err
-	}*/
+	}
 
 	rBytes := sig[:32]
 	sBytes := sig[32:64]
