@@ -64,7 +64,7 @@ func (d *DataComEndpoints) SignSequence(signedSequence types.SignedSequence) (in
 		return "0x0", rpc.NewRPCError(rpc.DefaultErrorCode, err.Error())
 	}
 	// Sign
-	signedSequenceByMe, err := signedSequence.Sequence.Sign(d.privateKey)
+	signedSequenceByMe, err := signedSequence.Sequence.Sign()
 	if err != nil {
 		return "0x0", rpc.NewRPCError(rpc.DefaultErrorCode, fmt.Errorf("failed to sign. Error: %w", err).Error())
 	}

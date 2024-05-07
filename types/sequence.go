@@ -3,7 +3,6 @@ package types
 import (
 	"bytes"
 	"context"
-	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -89,7 +88,7 @@ func sendRequestsToAdaptor(ctx context.Context, url string, payload MessagePaylo
 
 // Sign returns a signed sequence by the private key.
 // Note that what's being signed is the accumulated input hash
-func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey) (*SignedSequence, error) {
+func (s *Sequence) Sign() (*SignedSequence, error) {
 	log.Infof("Inside sequence.go Sign function!")
 
 	hashToSign := s.HashToSign()
@@ -253,7 +252,7 @@ func (s *SignedSequence) Signer() (common.Address, error) {
 	// copy(mySig, sig)
 	// mySig[64] -= 27
 
-	log.Infof("REcovetring key in DAC ====================")
+	log.Infof("Recovering key in DAC ====================")
 	pubKey, err := crypto.SigToPub(contentHash[:], sig)
 	if err != nil {
 		log.Infof("error converting to public key", err)

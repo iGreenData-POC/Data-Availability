@@ -24,6 +24,7 @@ const (
 // Config represents the full configuration of the data node
 type Config struct {
 	PrivateKey types.KeystoreFileConfig
+	DACAddress string
 	DB         db.Config
 	Log        log.Config
 	RPC        rpc.Config
@@ -82,6 +83,7 @@ func NewKeyFromKeystore(cfg types.KeystoreFileConfig) (*ecdsa.PrivateKey, error)
 	if cfg.Path == "" && cfg.Password == "" {
 		return nil, nil
 	}
+	log.Infof("========= To remove Keystore path and password:", cfg.Path, cfg.Password)
 	keystoreEncrypted, err := os.ReadFile(filepath.Clean(cfg.Path))
 	if err != nil {
 		return nil, err

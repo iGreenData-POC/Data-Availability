@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
 	"os"
 	"os/signal"
 	"time"
@@ -19,7 +20,6 @@ import (
 	"github.com/0xPolygon/cdk-data-availability/services/sync"
 	"github.com/0xPolygon/cdk-data-availability/synchronizer"
 	"github.com/0xPolygon/cdk-data-availability/types"
-	"github.com/ethereum/go-ethereum/crypto"
 	_ "github.com/lib/pq"
 	"github.com/urfave/cli/v2"
 )
@@ -75,12 +75,15 @@ func start(cliCtx *cli.Context) error {
 	}
 
 	storage := db.New(pg)
+	log.Infof("Read private key from configs", c.PrivateKey)
+	/*
+		// Load private key
+		pk, err := config.NewKeyFromKeystore(c.PrivateKey)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	// Load private key
-	pk, err := config.NewKeyFromKeystore(c.PrivateKey)
-	if err != nil {
-		log.Fatal(err)
-	}
+	*/
 
 	// Load EtherMan
 	etm, err := etherman.New(cliCtx.Context, c.L1)
@@ -89,8 +92,8 @@ func start(cliCtx *cli.Context) error {
 	}
 
 	// derive address
-	selfAddr := crypto.PubkeyToAddress(pk.PublicKey)
-
+	//selfAddr := crypto.PubkeyToAddress(pk.PublicKey)
+	//log.Infof("=========Address read from keystore:", selfAddr)
 	// ensure synchro/reorg start block is set
 	err = synchronizer.InitStartBlock(storage, types.NewEthClientFactory(), c.L1)
 	if err != nil {
@@ -118,7 +121,7 @@ func start(cliCtx *cli.Context) error {
 
 	cancelFuncs = append(cancelFuncs, detector.Stop)
 
-	batchSynchronizer, err := synchronizer.NewBatchSynchronizer(c.L1, selfAddr,
+	batchSynchronizer, err := synchronizer.NewBatchSynchronizer(c.L1, common.HexToAddress(c.DACAddress),
 		storage, detector.Subscribe(), etm, sequencerTracker, client.NewFactory())
 	if err != nil {
 		log.Fatal(err)
@@ -138,7 +141,7 @@ func start(cliCtx *cli.Context) error {
 				Name: datacom.APIDATACOM,
 				Service: datacom.NewDataComEndpoints(
 					storage,
-					pk,
+					nil,
 					sequencerTracker,
 				),
 			},
