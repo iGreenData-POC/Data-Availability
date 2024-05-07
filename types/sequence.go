@@ -8,10 +8,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
-	"math/big"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/0xPolygon/cdk-data-availability/log"
@@ -89,7 +88,7 @@ func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey) (*SignedSequence, error) {
 	log.Infof("Inside sequence.go Sign function!")
 	hashToSign := s.HashToSign()
 
-	/*payload := MessagePayload{
+	payload := MessagePayload{
 		Data: hex.EncodeToString(hashToSign),
 	}
 	log.Infof("Created message payload!")
@@ -99,18 +98,50 @@ func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey) (*SignedSequence, error) {
 		log.Infof("Failed to send message request to adaptor")
 		return nil, err
 	}
-	log.Infof("Send message request to adaptor!", sig)*/
+	log.Infof("Send message request to adaptor!", sig)
 
-	sig, err := crypto.Sign(hashToSign, privateKey)
+	/*sig, err := crypto.Sign(hashToSign, privateKey)
 	if err != nil {
 		return nil, err
-	}
+	}*/
 
 	rBytes := sig[:32]
 	sBytes := sig[32:64]
 	vByte := sig[64]
 
-	if strings.ToUpper(common.Bytes2Hex(sBytes)) > "7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0" {
+	//////////////////
+
+	firstHash := s.HashToSign()
+	log.Infof("Creating firstHash============>", firstHash)
+
+	message := hex.EncodeToString(firstHash)
+	log.Infof("Hex encoding firstHash===========>", message)
+
+	wrappedMessage := "\x19Ethereum Signed Message:\n" +
+		string(rune(len(message))) +
+		message
+
+	// Calculate the hash of the wrapped message
+	hash := sha256.Sum256([]byte(wrappedMessage))
+
+	// Calculate the hash of the hash
+	contentHash := sha256.Sum256(hash[:])
+
+	mySig := make([]byte, 65)
+	copy(mySig, sig)
+	mySig[64] -= 27
+
+	pubKey, err := crypto.SigToPub(contentHash[:], mySig)
+	if err != nil {
+		fmt.Println("error recovering pub key", err)
+	}
+	val := crypto.PubkeyToAddress(*pubKey)
+
+	fmt.Println("recovered address is:", val.String())
+
+	/////////////////
+
+	/*if strings.ToUpper(common.Bytes2Hex(sBytes)) > "7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0" {
 		magicNumber := common.Hex2Bytes("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141")
 		sBig := big.NewInt(0).SetBytes(sBytes)
 		magicBig := big.NewInt(0).SetBytes(magicNumber)
@@ -122,7 +153,7 @@ func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey) (*SignedSequence, error) {
 			vByte = 0
 		}
 	}
-	vByte += 27
+	vByte += 27*/
 
 	actualSignature := []byte{}
 	actualSignature = append(actualSignature, rBytes...)
