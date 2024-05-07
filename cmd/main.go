@@ -75,7 +75,7 @@ func start(cliCtx *cli.Context) error {
 	}
 
 	storage := db.New(pg)
-	log.Infof("Read private key from configs", c.PrivateKey)
+	//log.Infof("Read private key from configs", c.PrivateKey)
 	/*
 		// Load private key
 		pk, err := config.NewKeyFromKeystore(c.PrivateKey)
