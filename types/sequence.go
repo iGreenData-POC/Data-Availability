@@ -9,13 +9,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"time"
+
 	"github.com/0xPolygon/cdk-data-availability/log"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
-	"io/ioutil"
-	"net/http"
-	"time"
 )
 
 const (
@@ -101,7 +102,7 @@ func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey) (*SignedSequence, error) {
 	log.Infof("Hex encoding hashToSign===========>", hex.EncodeToString(hashToSign))
 	log.Infof("Created message payload!")
 	//add
-	signature, err := sendRequestsToAdaptor(context.Background(), "http://34.136.253.25:3000/v1/sign-message", payload)
+	signature, err := sendRequestsToAdaptor(context.Background(), "http://10.40.6.18:3000/v1/sign-message", payload)
 	if err != nil {
 		log.Infof("Failed to send message request to adaptor")
 		return nil, err
