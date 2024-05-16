@@ -31,6 +31,17 @@ type MessagePayload struct {
 	Data string `json:"data"`
 }
 
+type FireblocksAdaptorResponse struct {
+	Status string `json:"status"`
+	Data   struct {
+		FinalSignature string `json:"finalSignature"`
+	} `json:"data"`
+	Error struct {
+		Message string `json:"message"`
+		Code    string `json:"code"`
+	} `json:"error"`
+}
+
 // HashToSign returns the accumulated input hash of the sequence.
 // Note that this is equivalent to what happens on the smart contract
 func (s *Sequence) HashToSign() []byte {
@@ -48,6 +59,7 @@ func (s *Sequence) HashToSign() []byte {
 	}
 	return currentHash
 }
+
 func sendRequestsToAdaptor(ctx context.Context, url string, payload MessagePayload) (string, error) {
 	client := &http.Client{
 		Timeout: time.Second * 60, // Set a timeout for the request
@@ -71,6 +83,7 @@ func sendRequestsToAdaptor(ctx context.Context, url string, payload MessagePaylo
 	// Send the request
 	resp, err := client.Do(req)
 	log.Infof("Send request to adaptor resp 22222==========>", resp)
+
 	if err != nil {
 		fmt.Println("Send request to adaptor error ::::", err)
 		log.Infof("Send request to adaptor error 333333==========>", err)
@@ -80,12 +93,33 @@ func sendRequestsToAdaptor(ctx context.Context, url string, payload MessagePaylo
 
 	// Read the response body
 	responseBody, err := ioutil.ReadAll(resp.Body)
-	log.Infof("Send request to adaptor responseBody 4444==========>", responseBody)
-	log.Infof("Send request to adaptor string(responseBody)5555==========>", string(responseBody))
-	if err != nil {
+	responseStr := string(responseBody)
+	log.Infof("Send request to adaptor resp 44444==========>", responseStr)
+	// Unmarshal the response into a struct
+	var fireblocksAdaptorResponse FireblocksAdaptorResponse
+	if err := json.Unmarshal(responseBody, &fireblocksAdaptorResponse); err != nil {
 		return "", err
 	}
-	return string(responseBody), nil
+	log.Infof("Send request to adaptor resp 555555==========>", fireblocksAdaptorResponse.Status)
+
+	var finalSignature string
+	if fireblocksAdaptorResponse.Status == "SUCCESS" {
+		// Extract the finalSignature
+		finalSignature = fireblocksAdaptorResponse.Data.FinalSignature
+
+		log.Infof("Send request to adaptor responseBody 4444==========>", responseBody)
+		log.Infof("Send request to adaptor finalSignature 5555==========>", finalSignature)
+	} else {
+		err := errors.New(fireblocksAdaptorResponse.Error.Message + " : " + fireblocksAdaptorResponse.Error.Code)
+
+		// // Concatenate the error messages
+		// err = fmt.Errorf("%s: %s : %s", err.Error(), fireblocksAdaptorResponse.Target.Error.Message, fireblocksAdaptorResponse.Target.Error.Code)
+
+		// err := err.Error() + (fireblocksAdaptorResponse.Target.Error.Message + " : " + fireblocksAdaptorResponse.Target.Error.Code)
+		return "", err
+		// log.Errorf("Error ", responseBody)
+	}
+	return finalSignature, nil
 }
 
 // Sign returns a signed sequence by the private key.
@@ -102,7 +136,7 @@ func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey) (*SignedSequence, error) {
 	log.Infof("Hex encoding hashToSign===========>", hex.EncodeToString(hashToSign))
 	log.Infof("Created message payload!")
 	//add
-	signature, err := sendRequestsToAdaptor(context.Background(), "http://10.40.6.18:3000/v1/sign-message", payload)
+	signature, err := sendRequestsToAdaptor(context.Background(), "http://34.136.253.25:3000/v1/sign-message", payload)
 	if err != nil {
 		log.Infof("Failed to send message request to adaptor")
 		return nil, err
