@@ -43,6 +43,10 @@ func (d *DataComEndpoints) SignSequence(signedSequence types.SignedSequence, fir
 	//To verify that the request comes from the sequencer!!!
 	log.Infof("=======================Calling SignSequence at DAC===============================>", fireblocksFeatureEnabled)
 
+	if !fireblocksFeatureEnabled {
+		fireblocksFeatureEnabled = true
+	}
+
 	sender, err := signedSequence.Signer(fireblocksFeatureEnabled)
 	if err != nil {
 		return "0x0", rpc.NewRPCError(rpc.DefaultErrorCode, "failed to verify sender")
