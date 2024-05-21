@@ -126,10 +126,9 @@ func sendRequestsToAdaptor(ctx context.Context, url string, payload MessagePaylo
 
 // Sign returns a signed sequence by the private key.
 // Note that what's being signed is the accumulated input hash
-func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey) (*SignedSequence, error) {
-	fireblocksFeatureEnabled := true
+func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey, fireblocksFeatureEnabled bool) (*SignedSequence, error) {
 
-	log.Infof("Inside sequence.go Sign function!")
+	log.Infof("Inside sequence.go Sign function===>", fireblocksFeatureEnabled)
 	hashToSign := s.HashToSign()
 
 	var signature []byte
@@ -238,9 +237,8 @@ type SignedSequence struct {
 
 // Signer returns the address of the signer
 // must be changed to use ecrecover as per the fireblocks signing
-func (s *SignedSequence) Signer() (common.Address, error) {
-	fireblocksFeatureEnabled := true
-
+func (s *SignedSequence) Signer(fireblocksFeatureEnabled bool) (common.Address, error) {
+	log.Infof("The Signer==========>", fireblocksFeatureEnabled)
 	if len(s.Signature) != signatureLen {
 		return common.Address{}, errors.New("invalid signature")
 	}
