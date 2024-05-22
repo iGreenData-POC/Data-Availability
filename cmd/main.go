@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"fmt"
 	"os"
 	"os/signal"
@@ -19,6 +20,7 @@ import (
 	"github.com/0xPolygon/cdk-data-availability/services/sync"
 	"github.com/0xPolygon/cdk-data-availability/synchronizer"
 	"github.com/0xPolygon/cdk-data-availability/types"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	_ "github.com/lib/pq"
 	"github.com/urfave/cli/v2"
@@ -77,18 +79,18 @@ func start(cliCtx *cli.Context) error {
 	storage := db.New(pg)
 
 	log.Infof("=================DAC STRAT c.FireblocksFeatureEnabled ===================>", c.FireblocksFeatureEnabled)
-	// var selfAddr common.Address
-	// var pk *ecdsa.PrivateKey
+	var selfAddr common.Address
+	var pk *ecdsa.PrivateKey
 
 	// Load private key
-	// if !c.FireblocksFeatureEnabled {
-	pk, err := config.NewKeyFromKeystore(c.PrivateKey)
-	if err != nil {
-		log.Fatal(err)
+	if !c.FireblocksFeatureEnabled {
+		pk, err := config.NewKeyFromKeystore(c.PrivateKey)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// derive address
+		selfAddr = crypto.PubkeyToAddress(pk.PublicKey)
 	}
-	// derive address
-	selfAddr := crypto.PubkeyToAddress(pk.PublicKey)
-	// }
 
 	// Load EtherMan
 	etm, err := etherman.New(cliCtx.Context, c.L1)
