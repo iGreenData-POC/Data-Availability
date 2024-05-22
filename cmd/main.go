@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"fmt"
 	"os"
 	"os/signal"
@@ -79,6 +80,8 @@ func start(cliCtx *cli.Context) error {
 
 	log.Infof("=================DAC STRAT c.FireblocksFeatureEnabled ===================>", c.FireblocksFeatureEnabled)
 	var selfAddr common.Address
+	var pk *ecdsa.PrivateKey
+
 	// Load private key
 	if !c.FireblocksFeatureEnabled {
 		pk, err := config.NewKeyFromKeystore(c.PrivateKey)
