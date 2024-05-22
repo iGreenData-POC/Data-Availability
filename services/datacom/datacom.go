@@ -46,6 +46,7 @@ func (d *DataComEndpoints) SignSequence(signedSequence types.SignedSequence, fir
 	if err != nil {
 		return "0x0", rpc.NewRPCError(rpc.DefaultErrorCode, "failed to verify sender")
 	}
+	log.Infof("==========================SignSequence====================>", sender, "=======", d.sequencerTracker.GetAddr())
 	if sender != d.sequencerTracker.GetAddr() {
 		return "0x0", rpc.NewRPCError(rpc.DefaultErrorCode, "unauthorized")
 	}
