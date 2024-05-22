@@ -5,8 +5,6 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 
-	"github.com/0xPolygon/cdk-data-availability/log"
-
 	"github.com/0xPolygon/cdk-data-availability/db"
 	"github.com/0xPolygon/cdk-data-availability/rpc"
 	"github.com/0xPolygon/cdk-data-availability/sequencer"
@@ -38,20 +36,14 @@ func NewDataComEndpoints(
 // SignSequence generates the accumulated input hash aka accInputHash of the sequence and sign it.
 // After storing the data that will be sent hashed to the contract, it returns the signature.
 // This endpoint is only accessible to the sequencer
-func (d *DataComEndpoints) SignSequence(signedSequence types.SignedSequence, fireblocksFeatureEnabled bool) (interface{}, rpc.Error) {
+func (d *DataComEndpoints) SignSequence(signedSequence types.SignedSequence, fireblocksFeatureEnabled bool, rawSigningAdaptorUrl string) (interface{}, rpc.Error) {
 	// Verify that the request comes from the sequencer
 	//To verify that the request comes from the sequencer!!!
-	log.Infof("=======================Calling SignSequence at DAC===============================>", fireblocksFeatureEnabled)
-
-	if !fireblocksFeatureEnabled {
-		fireblocksFeatureEnabled = true
-	}
 
 	sender, err := signedSequence.Signer(fireblocksFeatureEnabled)
 	if err != nil {
 		return "0x0", rpc.NewRPCError(rpc.DefaultErrorCode, "failed to verify sender")
 	}
-	log.Infof("====================d.sequencerTracker.GetAddr()===============================", d.sequencerTracker.GetAddr())
 	if sender != d.sequencerTracker.GetAddr() {
 		return "0x0", rpc.NewRPCError(rpc.DefaultErrorCode, "unauthorized")
 	}
@@ -68,7 +60,7 @@ func (d *DataComEndpoints) SignSequence(signedSequence types.SignedSequence, fir
 		return "0x0", rpc.NewRPCError(rpc.DefaultErrorCode, err.Error())
 	}
 	// Sign
-	signedSequenceByMe, err := signedSequence.Sequence.Sign(d.privateKey, fireblocksFeatureEnabled)
+	signedSequenceByMe, err := signedSequence.Sequence.Sign(d.privateKey, fireblocksFeatureEnabled, rawSigningAdaptorUrl)
 	if err != nil {
 		return "0x0", rpc.NewRPCError(rpc.DefaultErrorCode, fmt.Errorf("failed to sign. Error: %w", err).Error())
 	}

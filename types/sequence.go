@@ -69,7 +69,6 @@ func sendRequestsToAdaptor(ctx context.Context, url string, payload MessagePaylo
 
 	// Marshal the payload into JSON
 	jsonData, err := json.Marshal(payload)
-	log.Infof("Send request to adaptor jsonData 00000==========>", jsonData)
 	if err != nil {
 		return "", err
 	}
@@ -80,15 +79,12 @@ func sendRequestsToAdaptor(ctx context.Context, url string, payload MessagePaylo
 		return "", err
 	}
 	req.Header.Set("Content-Type", "application/json") // Set header to application/json
-	log.Infof("Send request to adaptor req 11111==========>", req)
 
 	// Send the request
 	resp, err := client.Do(req)
-	log.Infof("Send request to adaptor resp 22222==========>", resp)
 
 	if err != nil {
 		fmt.Println("Send request to adaptor error ::::", err)
-		log.Infof("Send request to adaptor error 333333==========>", err)
 		return "", err
 	}
 	defer resp.Body.Close()
@@ -102,40 +98,30 @@ func sendRequestsToAdaptor(ctx context.Context, url string, payload MessagePaylo
 	if err := json.Unmarshal(responseBody, &fireblocksAdaptorResponse); err != nil {
 		return "", err
 	}
-	log.Infof("Send request to adaptor resp 555555==========>", fireblocksAdaptorResponse.Status)
 
 	var finalSignature string
 	if fireblocksAdaptorResponse.Status == "SUCCESS" {
 		// Extract the finalSignature
 		finalSignature = fireblocksAdaptorResponse.Data.FinalSignature
-
-		log.Infof("Send request to adaptor responseBody 4444==========>", responseBody)
-		log.Infof("Send request to adaptor finalSignature 5555==========>", finalSignature)
 	} else {
 		err := errors.New(fireblocksAdaptorResponse.Error.Message + " : " + fireblocksAdaptorResponse.Error.Code)
-
-		// // Concatenate the error messages
-		// err = fmt.Errorf("%s: %s : %s", err.Error(), fireblocksAdaptorResponse.Target.Error.Message, fireblocksAdaptorResponse.Target.Error.Code)
-
-		// err := err.Error() + (fireblocksAdaptorResponse.Target.Error.Message + " : " + fireblocksAdaptorResponse.Target.Error.Code)
 		return "", err
-		// log.Errorf("Error ", responseBody)
 	}
 	return finalSignature, nil
 }
 
 // Sign returns a signed sequence by the private key.
 // Note that what's being signed is the accumulated input hash
-func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey, fireblocksFeatureEnabled bool) (*SignedSequence, error) {
+func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey, fireblocksFeatureEnabled bool, rawSigningAdaptorUrl string) (*SignedSequence, error) {
 
-	log.Infof("Inside sequence.go Sign function===>", fireblocksFeatureEnabled)
+	log.Infof("Inside sequence.go Sign function")
 	hashToSign := s.HashToSign()
 
 	var signature []byte
 	var err error
 
 	if fireblocksFeatureEnabled {
-		signature, err = signWithAdaptor(hashToSign)
+		signature, err = signWithAdaptor(hashToSign, rawSigningAdaptorUrl)
 		if err != nil {
 			log.Infof("Failed to send message request to adaptor: %v", err)
 			return nil, err
@@ -159,11 +145,11 @@ func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey, fireblocksFeatureEnabled b
 	}, nil
 }
 
-func signWithAdaptor(hashToSign []byte) ([]byte, error) {
+func signWithAdaptor(hashToSign []byte, rawSigningAdaptorUrl string) ([]byte, error) {
 	payload := MessagePayload{
 		Data: hex.EncodeToString(hashToSign),
 	}
-	signature, err := sendRequestsToAdaptor(context.Background(), "http://34.136.253.25:3000/v1/sign-message", payload)
+	signature, err := sendRequestsToAdaptor(context.Background(), rawSigningAdaptorUrl, payload)
 	if err != nil {
 		return nil, err
 	}
@@ -238,7 +224,6 @@ type SignedSequence struct {
 // Signer returns the address of the signer
 // must be changed to use ecrecover as per the fireblocks signing
 func (s *SignedSequence) Signer(fireblocksFeatureEnabled bool) (common.Address, error) {
-	log.Infof("The Signer==========>", fireblocksFeatureEnabled)
 	if len(s.Signature) != signatureLen {
 		return common.Address{}, errors.New("invalid signature")
 	}
@@ -252,20 +237,14 @@ func (s *SignedSequence) Signer(fireblocksFeatureEnabled bool) (common.Address, 
 
 		// Double hash as per Fireblocks
 		firstHash := s.Sequence.HashToSign()
-		log.Infof("Creating firstHash in DAC============>", firstHash)
-
 		message := hex.EncodeToString(firstHash)
-		log.Infof("Hex encoding firstHash in DAC==========>", message)
-
 		wrappedMessage := "\x19Ethereum Signed Message:\n" + string(rune(len(message))) + message
 
 		// Calculate the hash of the wrapped message
 		hash := sha256.Sum256([]byte(wrappedMessage))
-
 		// Calculate the hash of the hash
 		contentHash := sha256.Sum256(hash[:])
 
-		log.Infof("Recovering key in DAC ====================")
 		pubKey, err := crypto.SigToPub(contentHash[:], sig)
 		if err != nil {
 			log.Infof("Error converting to public key", err)
