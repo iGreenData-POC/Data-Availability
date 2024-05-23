@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/0xPolygon/cdk-data-availability/db"
-	"github.com/0xPolygon/cdk-data-availability/log"
 	"github.com/0xPolygon/cdk-data-availability/rpc"
 	"github.com/0xPolygon/cdk-data-availability/sequencer"
 	"github.com/0xPolygon/cdk-data-availability/types"
@@ -40,13 +39,11 @@ func NewDataComEndpoints(
 func (d *DataComEndpoints) SignSequence(signedSequence types.SignedSequence, fireblocksFeatureEnabled bool, rawSigningAdaptorUrl string) (interface{}, rpc.Error) {
 	// Verify that the request comes from the sequencer
 	//To verify that the request comes from the sequencer!!!
-	log.Infof("==========================SignSequence====================>", rawSigningAdaptorUrl)
-
 	sender, err := signedSequence.Signer(fireblocksFeatureEnabled)
 	if err != nil {
 		return "0x0", rpc.NewRPCError(rpc.DefaultErrorCode, "failed to verify sender")
 	}
-	log.Infof("==========================SignSequence====================>", sender, "=======", d.sequencerTracker.GetAddr())
+
 	if sender != d.sequencerTracker.GetAddr() {
 		return "0x0", rpc.NewRPCError(rpc.DefaultErrorCode, "unauthorized")
 	}

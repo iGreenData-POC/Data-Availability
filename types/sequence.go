@@ -91,8 +91,6 @@ func sendRequestsToAdaptor(ctx context.Context, url string, payload MessagePaylo
 
 	// Read the response body
 	responseBody, err := ioutil.ReadAll(resp.Body)
-	responseStr := string(responseBody)
-	log.Infof("Send request to adaptor resp 44444==========>", responseStr)
 	// Unmarshal the response into a struct
 	var fireblocksAdaptorResponse FireblocksAdaptorResponse
 	if err := json.Unmarshal(responseBody, &fireblocksAdaptorResponse); err != nil {

@@ -78,7 +78,6 @@ func start(cliCtx *cli.Context) error {
 
 	storage := db.New(pg)
 
-	log.Infof("=================DAC STRAT c.FireblocksFeatureEnabled ===================>", c.FireblocksFeatureEnabled)
 	var selfAddr common.Address
 	var pk *ecdsa.PrivateKey
 
