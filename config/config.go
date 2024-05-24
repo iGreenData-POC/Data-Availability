@@ -23,11 +23,12 @@ const (
 
 // Config represents the full configuration of the data node
 type Config struct {
-	PrivateKey types.KeystoreFileConfig
-	DB         db.Config
-	Log        log.Config
-	RPC        rpc.Config
-	L1         L1Config
+	PrivateKey               types.KeystoreFileConfig
+	DB                       db.Config
+	Log                      log.Config
+	RPC                      rpc.Config
+	L1                       L1Config
+	FireblocksFeatureEnabled bool `mapstructure:"FireblocksFeatureEnabled"`
 }
 
 // L1Config is a struct that defines L1 contract and service settings

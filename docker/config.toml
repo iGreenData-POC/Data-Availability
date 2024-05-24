@@ -1,10 +1,11 @@
 PrivateKey = {Path = "/pk/test-member.keystore", Password = "password"} # CHANGE THIS (the password): according to the private key file password
+FireblocksFeatureEnabled = true
 
 [L1]
 WsURL = "wss://eth-sepolia.g.alchemy.com/v2/cU_hSlUcnHTsHQqz48Z6fuzbfM0qc2bq"     # CHANGE THIS: use the URL of your L1 node
 RpcURL = "https://eth-sepolia.g.alchemy.com/v2/cU_hSlUcnHTsHQqz48Z6fuzbfM0qc2bq"  # CHANGE THIS: use the URL of your L1 node
-PolygonValidiumAddress = "0x3f0228584745dbcEb03AA8af73A079cd4a070D21"       # CHANGE THIS: Address of the Validium smart contract
-DataCommitteeAddress = "0x033aA5eA457Fc80921e67cB2Ee1e1f888f03851A"     # CHANGE THIS: Address of the data availability committee smart contract
+PolygonValidiumAddress = "0x72B2d2CE98A759b57B2db8e2A34997B710F07Bd6"       # CHANGE THIS: Address of the Validium smart contract
+DataCommitteeAddress = "0x01C0942b66c08a5B7919e496cB7B1631921CBa17"     # CHANGE THIS: Address of the data availability committee smart contract
 Timeout = "3m"
 RetryPeriod = "5s"
 BlockBatchSize = 32
