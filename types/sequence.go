@@ -118,17 +118,9 @@ func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey, fireblocksFeatureEnabled b
 	var signature []byte
 	var err error
 
-	if fireblocksFeatureEnabled {
-		signature, err = signWithAdaptor(hashToSign, rawSigningAdaptorUrl)
-		if err != nil {
-			log.Infof("Failed to send message request to adaptor: %v", err)
-			return nil, err
-		}
-	} else {
-		signature, err = signWithPrivateKey(hashToSign, privateKey)
-		if err != nil {
-			return nil, err
-		}
+	signature, err = signWithPrivateKey(hashToSign, privateKey)
+	if err != nil {
+		return nil, err
 	}
 
 	finalSignature, err := processSignature(signature, fireblocksFeatureEnabled)
@@ -188,9 +180,7 @@ func processSignature(sig []byte, fireblocksFeatureEnabled bool) ([]byte, error)
 		}
 	}
 
-	if !fireblocksFeatureEnabled {
-		vByte += 27
-	}
+	vByte += 27
 
 	actualSignature := []byte{}
 	actualSignature = append(actualSignature, rBytes...)
