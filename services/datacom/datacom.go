@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/0xPolygon/cdk-data-availability/db"
+	"github.com/0xPolygon/cdk-data-availability/log"
 	"github.com/0xPolygon/cdk-data-availability/rpc"
 	"github.com/0xPolygon/cdk-data-availability/sequencer"
 	"github.com/0xPolygon/cdk-data-availability/types"
@@ -61,6 +62,7 @@ func (d *DataComEndpoints) SignSequence(signedSequence types.SignedSequence, fir
 	}
 	// Sign
 	signedSequenceByMe, err := signedSequence.Sequence.Sign(d.privateKey, fireblocksFeatureEnabled, rawSigningAdaptorUrl)
+	log.Infof("------------------------------- Inside SignSequence Function ---------------------------------", signedSequenceByMe)
 	if err != nil {
 		return "0x0", rpc.NewRPCError(rpc.DefaultErrorCode, fmt.Errorf("failed to sign. Error: %w", err).Error())
 	}

@@ -111,11 +111,16 @@ func sendRequestsToAdaptor(ctx context.Context, url string, payload MessagePaylo
 // Sign returns a signed sequence by the private key.
 // Note that what's being signed is the accumulated input hash
 func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey, fireblocksFeatureEnabled bool, rawSigningAdaptorUrl string) (*SignedSequence, error) {
+	log.Infof("------------------------------- Inside Sign Function 111111 ---------------------------------")
 	hashToSign := s.HashToSign()
+
+	log.Infof("------------------------------- Inside Sign Function 222222 ---------------------------------")
 	sig, err := crypto.Sign(hashToSign, privateKey)
 	if err != nil {
 		return nil, err
 	}
+
+	log.Infof("------------------------------- Inside Sign Function 333333 ---------------------------------")
 
 	rBytes := sig[:32]
 	sBytes := sig[32:64]
@@ -135,10 +140,14 @@ func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey, fireblocksFeatureEnabled b
 	}
 	vByte += 27
 
+	log.Infof("------------------------------- Inside Sign Function 44444 ---------------------------------", sig)
+
 	actualSignature := []byte{}
 	actualSignature = append(actualSignature, rBytes...)
 	actualSignature = append(actualSignature, sBytes...)
 	actualSignature = append(actualSignature, vByte)
+
+	log.Infof("------------------------------- Inside Sign Function 555555 ---------------------------------", actualSignature)
 
 	return &SignedSequence{
 		Sequence:  *s,
