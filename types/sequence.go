@@ -115,6 +115,9 @@ func (s *Sequence) Sign(privateKey *ecdsa.PrivateKey, fireblocksFeatureEnabled b
 	hashToSign := s.HashToSign()
 
 	log.Infof("------------------------------- Inside Sign Function 222222 ---------------------------------")
+
+	dacAddress := crypto.PubkeyToAddress(privateKey.PublicKey)
+	log.Infof("------------------------------DAC Address derived from DAC private key------------------------------", dacAddress.String())
 	sig, err := crypto.Sign(hashToSign, privateKey)
 	if err != nil {
 		return nil, err
