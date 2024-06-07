@@ -4,8 +4,8 @@ FireblocksFeatureEnabled = true
 [L1]
 WsURL = "wss://eth-sepolia.g.alchemy.com/v2/cU_hSlUcnHTsHQqz48Z6fuzbfM0qc2bq"     # CHANGE THIS: use the URL of your L1 node
 RpcURL = "https://eth-sepolia.g.alchemy.com/v2/cU_hSlUcnHTsHQqz48Z6fuzbfM0qc2bq"  # CHANGE THIS: use the URL of your L1 node
-PolygonValidiumAddress = "0x310Cd87E20626F53329e9B31922681bea8CE72aD"       # CHANGE THIS: Address of the Validium smart contract
-DataCommitteeAddress = "0xa264d8fbD2Cad0343Ad152df33EA981B69a50D54"     # CHANGE THIS: Address of the data availability committee smart contract
+PolygonValidiumAddress = "0xae119dA2C2341A1afF2449A8e85267412908eF04"       # CHANGE THIS: Address of the Validium smart contract
+DataCommitteeAddress = "0x2e1688C6FEb6B83810647b5A3C18360dA4815c23"     # CHANGE THIS: Address of the data availability committee smart contract
 Timeout = "3m"
 RetryPeriod = "5s"
 BlockBatchSize = 32
